@@ -35,7 +35,12 @@ public class DriverFactory {
                 if (headless) {
                     options.addArguments("--headless=new");
                     options.addArguments("--no-sandbox");
-                    options.addArguments("--disable-dev-shm-usage");// latest chrome headless
+                    options.addArguments("--disable-dev-shm-usage");
+                    options.addArguments("--disable-gpu");
+                    options.addArguments("--remote-allow-origins=*");
+                    options.addArguments("--disable-infobars");
+                    options.addArguments("--disable-extensions");
+                    options.addArguments("--disable-software-rasterizer");
                 }
                 options.addArguments("--start-maximized");
                 webDriver = new ChromeDriver(options);
