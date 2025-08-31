@@ -15,7 +15,10 @@ public class DriverFactory {
     public static WebDriver getDriver() {
         return driver.get();
     }
-
+    private static boolean isCI() {
+        // GitHub Actions and most CI systems set this environment variable
+        return "true".equalsIgnoreCase(System.getenv("CI"));
+    }
     public static void initDriver() {
         String browser = ConfigManager.getBrowser().toLowerCase();
         boolean headless = ConfigManager.isHeadless();
@@ -30,24 +33,29 @@ public class DriverFactory {
                 webDriver = new EdgeDriver();
                 break;
             case "chrome":
-            default:
-                ChromeOptions options = new ChromeOptions();
-                if (headless) {
-                    options.addArguments("--headless=new");
-                    options.addArguments("--no-sandbox");
-                    options.addArguments("--disable-dev-shm-usage");
-                    options.addArguments("--disable-gpu");
-                    options.addArguments("--remote-allow-origins=*");
-                    options.addArguments("--disable-infobars");
-                    options.addArguments("--disable-extensions");
-                    options.addArguments("--disable-software-rasterizer");
+                ChromeOptions chromeOptions = new ChromeOptions();
+                if (isCI()) {
+                    // GitHub Actions / CI safe options
+                    chromeOptions.addArguments("--headless=new");
+                    chromeOptions.addArguments("--no-sandbox");
+                    chromeOptions.addArguments("--disable-dev-shm-usage");
+                    chromeOptions.addArguments("--disable-gpu");
+                    chromeOptions.addArguments("--remote-allow-origins=*");
+                    chromeOptions.addArguments("--disable-infobars");
+                    chromeOptions.addArguments("--disable-extensions");
+                    chromeOptions.addArguments("--disable-software-rasterizer");
+
+                    // 👇 fix for "user data directory is already in use"
+                    chromeOptions.addArguments("--user-data-dir=/tmp/chrome-user-data-" + System.currentTimeMillis());
+                } else {
+                    // Local execution
+                    chromeOptions.addArguments("--start-maximized");
                 }
-                options.addArguments("--start-maximized");
-                webDriver = new ChromeDriver(options);
+                driver.set(new ChromeDriver(chromeOptions));
                 break;
         }
 
-        driver.set(webDriver);
+
     }
 
     public static void quitDriver() {
