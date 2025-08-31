@@ -1,67 +1,58 @@
 package base;
-
-
-import config.ConfigManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.IOException;
 
 public class DriverFactory {
 
-    private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    private static WebDriver driver;
 
     public static WebDriver getDriver() {
-        return driver.get();
+        if (driver == null) {
+            driver = createDriver();
+        }
+        return driver;
     }
-    private static boolean isCI() {
-        // GitHub Actions and most CI systems set this environment variable
-        return "true".equalsIgnoreCase(System.getenv("CI"));
-    }
-    public static void initDriver() {
-        String browser = ConfigManager.getBrowser().toLowerCase();
-        boolean headless = ConfigManager.isHeadless();
 
-        WebDriver webDriver;
+    private static WebDriver createDriver() {
+        ChromeOptions options = new ChromeOptions();
 
-        switch (browser) {
-            case "firefox":
-                webDriver = new FirefoxDriver();
-                break;
-            case "edge":
-                webDriver = new EdgeDriver();
-                break;
-            case "chrome":
-                ChromeOptions chromeOptions = new ChromeOptions();
-                if (isCI()) {
-                    // GitHub Actions / CI safe options
-                    chromeOptions.addArguments("--headless=new");
-                    chromeOptions.addArguments("--no-sandbox");
-                    chromeOptions.addArguments("--disable-dev-shm-usage");
-                    chromeOptions.addArguments("--disable-gpu");
-                    chromeOptions.addArguments("--remote-allow-origins=*");
-                    chromeOptions.addArguments("--disable-infobars");
-                    chromeOptions.addArguments("--disable-extensions");
-                    chromeOptions.addArguments("--disable-software-rasterizer");
+        if (isCI()) {
+            // CI → headless + required flags
+            options.addArguments("--headless=new");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--window-size=1920,1080");
 
-                    // 👇 fix for "user data directory is already in use"
-                    chromeOptions.addArguments("--user-data-dir=/tmp/chrome-user-data-" + System.currentTimeMillis());
-                } else {
-                    // Local execution
-                    chromeOptions.addArguments("--start-maximized");
-                }
-                driver.set(new ChromeDriver(chromeOptions));
-                break;
+            // 🔑 Unique user data dir
+            try {
+                Path tempProfile = Files.createTempDirectory("chrome-profile");
+                options.addArguments("--user-data-dir=" + tempProfile.toAbsolutePath().toString());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create temp chrome profile", e);
+            }
+
+        } else {
+            // Local → open normal browser
+            options.addArguments("--start-maximized");
         }
 
+        return new ChromeDriver(options);
+    }
 
+    private static boolean isCI() {
+        return "true".equalsIgnoreCase(System.getenv("CI"));
     }
 
     public static void quitDriver() {
-        if (driver.get() != null) {
-            driver.get().quit();
-            driver.remove();
+        if (driver != null) {
+            driver.quit();
+            driver = null;
         }
     }
 }
