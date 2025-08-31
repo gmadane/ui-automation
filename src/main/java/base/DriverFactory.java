@@ -33,7 +33,9 @@ public class DriverFactory {
             default:
                 ChromeOptions options = new ChromeOptions();
                 if (headless) {
-                    options.addArguments("--headless=new"); // latest chrome headless
+                    options.addArguments("--headless=new");
+                    options.addArguments("--no-sandbox");
+                    options.addArguments("--disable-dev-shm-usage");// latest chrome headless
                 }
                 options.addArguments("--start-maximized");
                 webDriver = new ChromeDriver(options);
