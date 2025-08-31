@@ -1,5 +1,4 @@
 package base;
-
 import config.ConfigManager;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterMethod;

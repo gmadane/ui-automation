@@ -6,6 +6,7 @@
     <test name="UI Tests">
         <classes>
             <class name="tests.GoogleTest"/>
+
         </classes>
     </test>
 </suite>
