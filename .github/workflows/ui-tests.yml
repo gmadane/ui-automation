@@ -5,6 +5,9 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:    # ✅ allows you to run manually from GitHub Actions tab
+  schedule:
+    - cron: '*/5 * * * *' # ✅ runs every day at 03:00 UTC (you can change this)
 
 jobs:
   test:
