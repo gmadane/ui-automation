@@ -34,7 +34,7 @@ jobs:
           path: target/surefire-reports
 
       - name: Package Project Source
-        run: tar -czvf ui-automation-src.tar.gz .
+        run: tar -czvf ui-automation-src.tar.gz
 
       - name: Upload Project Artifact
         uses: actions/upload-artifact@v4
