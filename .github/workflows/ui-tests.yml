@@ -24,7 +24,7 @@ jobs:
           java-version: '23'
 
       - name: Run Tests
-        run: mvn clean test -Dbrowser=chrome
+        run: mvn clean test
 
       - name: Upload Test Reports
         if: always()
@@ -32,3 +32,12 @@ jobs:
         with:
           name: surefire-reports
           path: target/surefire-reports
+
+      - name: Package Project Source
+        run: tar -czvf ui-automation-src.tar.gz .
+
+      - name: Upload Project Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-automation-source-package
+          path: ui-automation-src.tar.gz
