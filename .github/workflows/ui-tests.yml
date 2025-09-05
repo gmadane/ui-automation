@@ -41,7 +41,7 @@ jobs:
 
       - name: Send Email with Extent Report
         if: success()
-        uses: devops-actions/email@v1
+        uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 587
