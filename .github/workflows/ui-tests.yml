@@ -34,7 +34,13 @@ jobs:
           path: target/surefire-reports
 
       - name: Package Project Source
-        run: tar -czvf ui-automation-src.tar.gz
+      run: |
+    if [ "$(ls -A)" ]; then
+      tar -czvf ui-automation-src.tar.gz .
+    else
+      echo "No files to archive"
+      exit 1
+    fi
 
       - name: Upload Project Artifact
         uses: actions/upload-artifact@v4
